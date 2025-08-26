@@ -1,0 +1,6 @@
+[project]
+name = "keposhka"
+version = "0.0.0"
+readme = "readme.md"
+requires-python = ">=3.12"
+dependencies = []
