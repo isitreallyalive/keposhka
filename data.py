@@ -1,34 +1,42 @@
-import random
 import os
-import subprocess
+from subprocess import run
+import random
 
 # configuration
 font = "Keposhka Regular"
 lang = "eng"
 count = 100
 
+# download training data
+if not os.path.exists("langdata"):
+    run([
+        "git", "clone", "--filter=blob:none", "--no-checkout",
+        "https://github.com/tesseract-ocr/langdata.git"
+    ])
+    run(["git", "sparse-checkout", "init", "--cone"], cwd="langdata")
+run(["git", "sparse-checkout", "set", lang], cwd="langdata")
+run(["git", "checkout"], cwd="langdata")
+
 # read the training data
-training = f"tesseract/langdata/{lang}/{lang}.training_text"
+training = f"langdata/{lang}/{lang}.training_text"
 with open(training, encoding="utf-8") as f:
     lines = [l.strip() for l in f.read().splitlines()]
 random.shuffle(lines)
 lines = lines[:count]
 
 # make sure the data directory exists
-out = "tesseract/tesstrain/data/Keposhka-ground-truth"
-if not os.path.exists(out):
-    os.makedirs(out, exist_ok=True)
+out = f"tesstrain/data/{font.replace(' ', '')}-ground-truth"
+os.makedirs(out, exist_ok=True)
 
 # write ground truths
 for i, line in enumerate(lines):
-    # label file
+    # label
     name = f"{lang}_{i}"
     path = os.path.join(out, f"{name}.gt.txt")
     with open(path, "w") as f:
         f.writelines([line])
-
     # image
-    subprocess.run([
+    run([
         "text2image",
         f"--font={font}",
         f"--text={path}",
@@ -40,5 +48,5 @@ for i, line in enumerate(lines):
         "--ysize=480",
         "--char_spacing=1.0",
         "--exposure=0",
-        f"--unicharset_file=tesseract/langdata/{lang}/{lang}.unicharset"
+        f"--unicharset_file=langdata/{lang}/{lang}.unicharset"
     ])
