@@ -1,0 +1,6 @@
+[submodule "langdata"]
+	path = tesseract/langdata
+	url = https://github.com/tesseract-ocr/langdata
+[submodule "tesstrain"]
+	path = tesseract/tesstrain
+	url = https://github.com/tesseract-ocr/tesstrain
